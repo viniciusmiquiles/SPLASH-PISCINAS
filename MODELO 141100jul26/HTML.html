@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splash Piscinas Arapiraca • Orçamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="blob blob-a"></div>
+<div class="blob blob-b"></div>
+<div class="blob blob-c"></div>
+
+<div class="page">
+
+  <header class="topbar">
+    <img src="logo_splash.jpg" alt="Splash Piscinas Arapiraca" class="logo">
+    <div class="topbar-text">
+      <h1>Monte o orçamento</h1>
+      <p>Preencha os dados e envie direto para o WhatsApp do cliente</p>
+    </div>
+  </header>
+
+  <ol class="steps" id="stepsNav">
+    <li class="step-dot active" data-step="1"><span>1</span>Cliente</li>
+    <li class="step-dot" data-step="2"><span>2</span>Piscina</li>
+    <li class="step-dot" data-step="3"><span>3</span>Orçamento</li>
+  </ol>
+
+  <main class="card">
+
+    <!-- PÁGINA 1 — CLIENTE -->
+    <section class="screen active" id="screen-1">
+      <h2>Dados do cliente</h2>
+      <p class="hint">Essas informações identificam o orçamento.</p>
+
+      <div class="field">
+        <label for="clienteNome">Cliente</label>
+        <input type="text" id="clienteNome" placeholder="Nome completo">
+      </div>
+
+      <div class="field">
+        <label for="clienteCidade">Cidade</label>
+        <input type="text" id="clienteCidade" placeholder="Cidade">
+      </div>
+
+      <div class="field">
+        <label for="clienteTelefone">Telefone (WhatsApp)</label>
+        <input type="tel" id="clienteTelefone" placeholder="(82) 9 9999-9999">
+      </div>
+
+      <div class="nav-buttons">
+        <span></span>
+        <button class="btn btn-primary" onclick="goToStep(2)">Próximo</button>
+      </div>
+    </section>
+
+    <!-- PÁGINA 2 — PISCINA -->
+    <section class="screen" id="screen-2">
+      <h2>Configuração da piscina</h2>
+      <p class="hint">Escolha o modelo e os itens adicionais.</p>
+
+      <div class="field">
+        <label for="modelo">Modelo de piscina</label>
+        <select id="modelo" onchange="onModeloChange()"></select>
+      </div>
+
+      <div class="field">
+        <label for="dimensoes">Dimensões</label>
+        <input type="text" id="dimensoes" readonly>
+      </div>
+
+      <div class="field" id="tierField">
+        <label for="tier">Tabela de preço</label>
+        <select id="tier" onchange="onTierChange()"></select>
+      </div>
+
+      <div class="field price-preview">
+        <label>Valor do modelo</label>
+        <div class="price-tag" id="modeloPrecoDisplay">R$ 0,00</div>
+      </div>
+
+      <h3 class="section-title">Itens adicionais</h3>
+      <p class="hint">Marque os itens inclusos e informe o valor vigente de cada um.</p>
+
+      <div class="extras-grid" id="extrasGrid"></div>
+
+      <div class="field">
+        <label for="brindes">Brindes extras</label>
+        <input type="text" id="brindes" placeholder="Descreva os brindes combinados">
+      </div>
+      <div class="field">
+        <label for="brindesValor">Valor dos brindes (se houver)</label>
+        <input type="text" inputmode="decimal" id="brindesValor" placeholder="0,00">
+      </div>
+
+      <h3 class="section-title">Fotos da piscina</h3>
+      <p class="hint">As fotos escolhidas aparecem no orçamento enviado ao cliente.</p>
+
+      <label class="upload-box" for="fotosInput">
+        <span class="upload-icon">＋</span>
+        <span>Adicionar fotos</span>
+        <input type="file" id="fotosInput" accept="image/*" multiple onchange="onFotosSelected(event)" hidden>
+      </label>
+      <div class="fotos-preview" id="fotosPreview"></div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="goToStep(1)">Voltar</button>
+        <button class="btn btn-primary" onclick="goToStep(3)">Próximo</button>
+      </div>
+    </section>
+
+    <!-- PÁGINA 3 — ORÇAMENTO -->
+    <section class="screen" id="screen-3">
+      <h2>Orçamento final</h2>
+      <p class="hint">Confira os itens, aplique descontos e envie ao cliente.</p>
+
+      <div class="resumo-cliente" id="resumoCliente"></div>
+
+      <div class="itens-tabela" id="itensTabela"></div>
+
+      <div class="total-box">
+        <span>Total do orçamento</span>
+        <strong id="totalGeral">R$ 0,00</strong>
+      </div>
+
+      <div class="fotos-preview" id="fotosResumo"></div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="goToStep(2)">Voltar</button>
+        <button class="btn btn-send" id="btnEnviar" onclick="enviarWhatsapp()">Enviar para o WhatsApp</button>
+      </div>
+    </section>
+
+  </main>
+
+  <p class="footnote" id="footnote"></p>
+</div>
+
+<script>
+/* =========================================================
+   CATÁLOGO — extraído da planilha de preços da Splash
+   ========================================================= */
+const CATALOGO = [
+  // Italiana (só Promocional / Valor)
+  {modelo:"Italiana 2,5", dimensoes:"2,5 x 1,5 x 0,30", promocional:2500, valor:6863, porcelana:null},
+  {modelo:"Italiana 3", dimensoes:"3 x 2 x 0,60", promocional:7599, valor:8876, porcelana:null},
+  {modelo:"Italiana 3,2", dimensoes:"3,2 x 2 x 1,30", promocional:9211, valor:10721, porcelana:null},
+  {modelo:"Italiana 3,5", dimensoes:"3,5 x 2 x 0,80", promocional:8748, valor:10026, porcelana:null},
+  {modelo:"Italiana 4", dimensoes:"4 x 2,4 x 1,30", promocional:10883, valor:12215, porcelana:null},
+  {modelo:"Italiana 5", dimensoes:"5 x 2,8 x 1,30", promocional:13385, valor:15626, porcelana:null},
+  {modelo:"Italiana 6", dimensoes:"6 x 3 x 1,40", promocional:13950, valor:17596, porcelana:null},
+  {modelo:"Italiana 7", dimensoes:"7 x 3,5 x 1,40", promocional:19626, valor:22111, porcelana:null},
+  {modelo:"Italiana 8", dimensoes:"8 x 4 x 1,40", promocional:22479, valor:26268, porcelana:null},
+
+  // Tradicional
+  {modelo:"Tradicional 3,5", dimensoes:"3,5 x 1,8 x 1", promocional:9525, valor:10640, porcelana:12079},
+  {modelo:"Tradicional 4", dimensoes:"4 x 2 x 1", promocional:10207, valor:11385, porcelana:13027},
+  {modelo:"Tradicional 4 c/1,40", dimensoes:"4 x 2 x 1,40", promocional:10925, valor:13355, porcelana:14997},
+  {modelo:"Tradicional 4,5", dimensoes:"4,5 x 2,15 x 1", promocional:11050, valor:13510, porcelana:15291},
+  {modelo:"Tradicional 5", dimensoes:"5 x 2,25 x 1,20", promocional:12965, valor:15634, porcelana:17655},
+  {modelo:"Tradicional 5 c/1,40", dimensoes:"5 x 2,25 x 1,40", promocional:13539, valor:16640, porcelana:18661},
+  {modelo:"Tradicional 5,5", dimensoes:"5,5 x 2,40 x 1,20", promocional:14095, valor:16890, porcelana:19047},
+  {modelo:"Tradicional 6", dimensoes:"6 x 2,5 x 1,40", promocional:15795, valor:18146, porcelana:20538},
+  {modelo:"Tradicional 6 c/ prainha", dimensoes:"6 x 2,5 x 1,40", promocional:15435, valor:17551, porcelana:19943},
+  {modelo:"Tradicional 6 spa (não recebe pastilha)", dimensoes:"6 x 2,5 x 1,40", promocional:16585, valor:19451, porcelana:null},
+  {modelo:"Tradicional 6,5", dimensoes:"6,5 x 2,7 x 1,40", promocional:16860, valor:20155, porcelana:22681},
+  {modelo:"Tradicional 7", dimensoes:"7 x 2,75 x 1,40", promocional:18927, valor:22162, porcelana:24824},
+  {modelo:"Tradicional 7 prainha", dimensoes:"7 x 2,9 x 1,40", promocional:18636, valor:21368, porcelana:24030},
+  {modelo:"Tradicional 7 spa", dimensoes:"7 x 2,9 x 1,40", promocional:20361, valor:24298, porcelana:26960},
+  {modelo:"Tradicional 7,5", dimensoes:"7,5 x 2,9 x 1,40", promocional:20131, valor:24170, porcelana:27022},
+  {modelo:"Tradicional 8", dimensoes:"8 x 3 x 1,40", promocional:22409, valor:26177, porcelana:29220},
+  {modelo:"Tradicional 8 prainha", dimensoes:"8 x 3 x 1,40", promocional:21836, valor:25186, porcelana:28229},
+  {modelo:"Tradicional 8 spa", dimensoes:"8 x 3 x 1,40", promocional:24030, valor:29144, porcelana:32187},
+  {modelo:"Tradicional 8,5", dimensoes:"8,5 x 3,5 x 1,40", promocional:23905, valor:28919, porcelana:32214},
+  {modelo:"Tradicional 9", dimensoes:"9 x 4 x 1,40", promocional:26021, valor:31201, porcelana:34648},
+
+  // Tropical
+  {modelo:"Tropical 3,5", dimensoes:"3,5 x 1,8 x 0,80", promocional:8733, valor:9597, porcelana:null},
+  {modelo:"Tropical 4", dimensoes:"4 x 2 x 1", promocional:9628, valor:10642, porcelana:null},
+  {modelo:"Tropical 5", dimensoes:"5 x 2,4 x 1,20", promocional:12100, valor:14242, porcelana:null},
+  {modelo:"Tropical 6", dimensoes:"6 x 2,6 x 1,30", promocional:14505, valor:16396, porcelana:null},
+  {modelo:"Tropical 7", dimensoes:"7 x 2,8 x 1,30", promocional:17483, valor:19750, porcelana:null},
+  {modelo:"Tropical 8", dimensoes:"8 x 3 x 1,30", promocional:20687, valor:23976, porcelana:null},
+  {modelo:"Tropical 9", dimensoes:"8,5 x 3,5 x 1,30", promocional:23216, valor:27033, porcelana:null},
+  {modelo:"Tropical 10", dimensoes:"10 x 4 x 1,30", promocional:26982, valor:30995, porcelana:null},
+
+  // Farol
+  {modelo:"Farol 4", dimensoes:"4 x 2 x 1,20", promocional:11060, valor:12789, porcelana:null},
+  {modelo:"Farol 5", dimensoes:"5 x 2,5 x 1,40", promocional:13466, valor:15655, porcelana:null},
+  {modelo:"Farol 6", dimensoes:"6 x 2,6 x 1,30", promocional:15946, valor:18667, porcelana:null},
+  {modelo:"Farol 7", dimensoes:"7 x 2,8 x 1,30", promocional:19692, valor:23113, porcelana:null},
+  {modelo:"Farol 8", dimensoes:"8 x 3 x 1,30", promocional:23057, valor:26986, porcelana:null},
+  {modelo:"Farol 9", dimensoes:"9 x 3,5 x 1,30", promocional:26537, valor:31891, porcelana:null},
+  {modelo:"Farol 10", dimensoes:"10 x 4 x 1,30", promocional:31828, valor:39331, porcelana:null},
+
+  // Cancún
+  {modelo:"Cancún 3", dimensoes:"3 x 1,8 x 0,80", promocional:9025, valor:13310, porcelana:null},
+  {modelo:"Cancún 4", dimensoes:"4 x 2 x 1,20", promocional:10710, valor:12297, porcelana:null},
+  {modelo:"Cancún 5", dimensoes:"5 x 2,5 x 1,40", promocional:14185, valor:16435, porcelana:null},
+  {modelo:"Cancún 6", dimensoes:"6 x 3 x 1,40", promocional:16800, valor:19502, porcelana:null},
+  {modelo:"Cancún 7", dimensoes:"7 x 3,5 x 1,40", promocional:21655, valor:25230, porcelana:null},
+  {modelo:"Cancún 8", dimensoes:"8 x 4 x 1,40", promocional:25855, valor:30155, porcelana:null},
+  {modelo:"Cancún 10", dimensoes:"10 x 4,3 x 1,40", promocional:32155, valor:35687, porcelana:null},
+
+  // Bonaire
+  {modelo:"Bonaire 3", dimensoes:"3 x 2 x 0,90", promocional:9675, valor:11117, porcelana:12580},
+  {modelo:"Bonaire 4", dimensoes:"4 x 2 x 1,40", promocional:11285, valor:13012, porcelana:14773},
+  {modelo:"Bonaire 5", dimensoes:"5 x 2,5 x 1,40", promocional:14400, valor:16697, porcelana:18869},
+  {modelo:"Bonaire 6", dimensoes:"6 x 3 x 1,40", promocional:17085, valor:19852, porcelana:22423},
+  {modelo:"Bonaire 7", dimensoes:"7 x 3,5 x 1,40", promocional:22155, valor:25857, porcelana:28703},
+  {modelo:"Bonaire 8", dimensoes:"8 x 4 x 1,40", promocional:26145, valor:30505, porcelana:33771},
+
+  // Tortuga
+  {modelo:"Tortuga 5", dimensoes:"5 x 2,3 x 1,40", promocional:13250, valor:15272, porcelana:17429},
+  {modelo:"Tortuga 7", dimensoes:"7 x 3,3 x 1,40", promocional:20645, valor:23975, porcelana:26831},
+  {modelo:"Tortuga 9", dimensoes:"9 x 3,5 x 1,40", promocional:24655, valor:28562, porcelana:null},
+  {modelo:"Tortuga 10", dimensoes:"10 x 4,3 x 1,40", promocional:29955, valor:35050, porcelana:39175},
+
+  // Atalaia
+  {modelo:"Atalaia 7", dimensoes:"7 x 3,3 x 1,40", promocional:23950, valor:28100, porcelana:null},
+  {modelo:"Atalaia 9", dimensoes:"9 x 4 x 1,40", promocional:31045, valor:36560, porcelana:40253},
+
+  // Nassau
+  {modelo:"Nassau 4", dimensoes:"4 x 3 x 1", promocional:13005, valor:15162, porcelana:16918},
+];
+
+const EXTRAS = ["Clorador", "Cascata", "LED", "Pastilha", "Pedra"];
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+let fotos = []; // {name, dataUrl}
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function brl(n){
+  return n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function parseValor(str){
+  if(!str) return 0;
+  const n = parseFloat(str.replace(/\./g,'').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+/* =========================================================
+   NAVEGAÇÃO ENTRE PÁGINAS
+   ========================================================= */
+function goToStep(n){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+  document.querySelectorAll('.step-dot').forEach(d => {
+    d.classList.toggle('active', Number(d.dataset.step) <= n);
+  });
+  if(n === 3) montarOrcamento();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================
+   PÁGINA 2 — MODELO / TIER / EXTRAS
+   ========================================================= */
+function popularModelos(){
+  const sel = document.getElementById('modelo');
+  CATALOGO.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = m.modelo;
+    sel.appendChild(opt);
+  });
+  onModeloChange();
+}
+
+function popularTiers(modelo){
+  const sel = document.getElementById('tier');
+  sel.innerHTML = '';
+  const tiers = [
+    {key:'promocional', label:'Promocional — ' + brl(modelo.promocional)},
+    {key:'valor', label:'Valor — ' + brl(modelo.valor)},
+  ];
+  if(modelo.porcelana){
+    tiers.push({key:'porcelana', label:'C/ Porcelana — ' + brl(modelo.porcelana)});
+  }
+  tiers.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.key;
+    opt.textContent = t.label;
+    sel.appendChild(opt);
+  });
+}
+
+function onModeloChange(){
+  const idx = document.getElementById('modelo').value;
+  const modelo = CATALOGO[idx];
+  document.getElementById('dimensoes').value = modelo.dimensoes;
+  popularTiers(modelo);
+  onTierChange();
+}
+
+function onTierChange(){
+  const idx = document.getElementById('modelo').value;
+  const modelo = CATALOGO[idx];
+  const tier = document.getElementById('tier').value;
+  const preco = modelo[tier] || 0;
+  document.getElementById('modeloPrecoDisplay').textContent = brl(preco);
+}
+
+function popularExtras(){
+  const grid = document.getElementById('extrasGrid');
+  EXTRAS.forEach(nome => {
+    const id = 'extra_' + nome.toLowerCase().replace(/[^a-z]/g,'');
+    const wrap = document.createElement('div');
+    wrap.className = 'extra-chip';
+    wrap.innerHTML = `
+      <label class="chip-check">
+        <input type="checkbox" id="${id}_on">
+        <span>${nome}</span>
+      </label>
+      <input type="text" inputmode="decimal" class="chip-price" id="${id}_valor" placeholder="0,00">
+    `;
+    grid.appendChild(wrap);
+  });
+}
+
+/* =========================================================
+   FOTOS
+   ========================================================= */
+function onFotosSelected(e){
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      fotos.push({name: file.name, dataUrl: ev.target.result});
+      renderFotos();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function removeFoto(i){
+  fotos.splice(i, 1);
+  renderFotos();
+}
+
+function renderFotos(){
+  const box = document.getElementById('fotosPreview');
+  box.innerHTML = '';
+  fotos.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'foto-thumb';
+    el.innerHTML = `<img src="${f.dataUrl}" alt="${f.name}"><button type="button" onclick="removeFoto(${i})">×</button>`;
+    box.appendChild(el);
+  });
+}
+
+/* =========================================================
+   PÁGINA 3 — MONTAR ORÇAMENTO
+   ========================================================= */
+function coletarItens(){
+  const idx = document.getElementById('modelo').value;
+  const modelo = CATALOGO[idx];
+  const tier = document.getElementById('tier').value;
+  const precoModelo = modelo[tier] || 0;
+
+  const itens = [{
+    nome: 'Piscina ' + modelo.modelo + ' (' + modelo.dimensoes + ')',
+    valor: precoModelo
+  }];
+
+  EXTRAS.forEach(nome => {
+    const id = 'extra_' + nome.toLowerCase().replace(/[^a-z]/g,'');
+    const on = document.getElementById(id + '_on').checked;
+    if(on){
+      const v = parseValor(document.getElementById(id + '_valor').value);
+      itens.push({nome, valor: v});
+    }
+  });
+
+  const brindesDesc = document.getElementById('brindes').value.trim();
+  const brindesValor = parseValor(document.getElementById('brindesValor').value);
+  if(brindesDesc || brindesValor){
+    itens.push({nome: 'Brindes: ' + (brindesDesc || '—'), valor: brindesValor});
+  }
+
+  return itens;
+}
+
+function montarOrcamento(){
+  const cliente = document.getElementById('clienteNome').value || '—';
+  const cidade = document.getElementById('clienteCidade').value || '—';
+  const telefone = document.getElementById('clienteTelefone').value || '—';
+
+  document.getElementById('resumoCliente').innerHTML = `
+    <div><span>Cliente</span><strong>${cliente}</strong></div>
+    <div><span>Cidade</span><strong>${cidade}</strong></div>
+    <div><span>Telefone</span><strong>${telefone}</strong></div>
+  `;
+
+  const itens = coletarItens();
+  const tabela = document.getElementById('itensTabela');
+  tabela.innerHTML = '';
+
+  let total = 0;
+
+  itens.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <span class="item-nome">${item.nome}</span>
+      <span class="item-valor" id="itemValor${i}">${brl(item.valor)}</span>
+      <input class="item-desconto" type="text" inputmode="decimal" placeholder="Desconto R$" data-base="${item.valor}" data-idx="${i}" oninput="recalcularItem(${i})">
+      <span class="item-final" id="itemFinal${i}">${brl(item.valor)}</span>
+    `;
+    tabela.appendChild(row);
+    total += item.valor;
+  });
+
+  document.getElementById('totalGeral').textContent = brl(total);
+
+  const resumoFotos = document.getElementById('fotosResumo');
+  resumoFotos.innerHTML = '';
+  fotos.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'foto-thumb foto-thumb--readonly';
+    el.innerHTML = `<img src="${f.dataUrl}" alt="${f.name}">`;
+    resumoFotos.appendChild(el);
+  });
+
+  recalcularTotal();
+}
+
+function recalcularItem(i){
+  const input = document.querySelector(`.item-desconto[data-idx="${i}"]`);
+  const base = parseFloat(input.dataset.base);
+  const desconto = parseValor(input.value);
+  const final = Math.max(base - desconto, 0);
+  document.getElementById('itemFinal' + i).textContent = brl(final);
+  recalcularTotal();
+}
+
+function recalcularTotal(){
+  let total = 0;
+  document.querySelectorAll('.item-desconto').forEach(input => {
+    const base = parseFloat(input.dataset.base);
+    const desconto = parseValor(input.value);
+    total += Math.max(base - desconto, 0);
+  });
+  document.getElementById('totalGeral').textContent = brl(total);
+}
+
+/* =========================================================
+   ENVIAR PARA O WHATSAPP
+   ========================================================= */
+function montarTexto(){
+  const cliente = document.getElementById('clienteNome').value || '—';
+  const cidade = document.getElementById('clienteCidade').value || '—';
+
+  let texto = `*Orçamento Splash Piscinas Arapiraca*\n\n`;
+  texto += `Cliente: ${cliente}\nCidade: ${cidade}\n\n`;
+
+  document.querySelectorAll('.item-row').forEach(row => {
+    const nome = row.querySelector('.item-nome').textContent;
+    const final = row.querySelector('.item-final').textContent;
+    texto += `• ${nome}: ${final}\n`;
+  });
+
+  texto += `\n*Total: ${document.getElementById('totalGeral').textContent}*`;
+
+  if(fotos.length){
+    texto += `\n\n(${fotos.length} foto(s) da piscina selecionadas — anexe junto a esta mensagem)`;
+  }
+  return texto;
+}
+
+async function enviarWhatsapp(){
+  const telefoneRaw = document.getElementById('clienteTelefone').value.replace(/\D/g,'');
+  const telefone = telefoneRaw.length ? '55' + telefoneRaw : '';
+  const texto = montarTexto();
+
+  // Tenta usar o compartilhamento nativo (envia texto + fotos juntos, quando suportado)
+  if(navigator.share && fotos.length){
+    try{
+      const files = await Promise.all(fotos.map(async (f, i) => {
+        const res = await fetch(f.dataUrl);
+        const blob = await res.blob();
+        return new File([blob], f.name || `foto-${i}.jpg`, {type: blob.type});
+      }));
+      if(navigator.canShare && navigator.canShare({files})){
+        await navigator.share({text: texto, files});
+        return;
+      }
+    }catch(err){
+      // segue para o fallback abaixo
+    }
+  }
+
+  // Fallback: abre o WhatsApp com o texto pronto (fotos precisam ser anexadas manualmente)
+  const url = `https://wa.me/${telefone}?text=${encodeURIComponent(texto)}`;
+  window.open(url, '_blank');
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+popularModelos();
+popularExtras();
+</script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+/* =========================================================
+   TOKENS
+   ========================================================= */
+:root{
+  --roxo: #5B2A86;
+  --roxo-2: #7C3AED;
+  --rosa: #EC4899;
+  --rosa-2: #F472B6;
+  --branco: #FFFFFF;
+  --ciano: #22D3EE;
+  --texto: #2B2033;
+  --texto-suave: #6B6274;
+  --borda: #EAE3F0;
+  --sombra: 0 20px 45px -20px rgba(91, 42, 134, 0.35);
+  --radius: 20px;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  margin: 0;
+  min-height: 100%;
+}
+
+body{
+  font-family: var(--font-body);
+  color: var(--texto);
+  background:
+    radial-gradient(circle at 100% 100%, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 40%),
+    linear-gradient(135deg,
+      var(--roxo) 0%,
+      var(--roxo-2) 22%,
+      var(--rosa) 48%,
+      var(--rosa-2) 66%,
+      #FBE7F3 84%,
+      var(--branco) 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* =========================================================
+   BLOBS DECORATIVOS (splash de fundo)
+   ========================================================= */
+.blob{
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+.blob-a{
+  width: 420px; height: 420px;
+  top: -120px; left: -140px;
+  background: var(--ciano);
+}
+.blob-b{
+  width: 320px; height: 320px;
+  top: 20%; right: -120px;
+  background: var(--rosa-2);
+  opacity: 0.25;
+}
+.blob-c{
+  width: 260px; height: 260px;
+  bottom: -100px; left: 20%;
+  background: var(--branco);
+  opacity: 0.4;
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.page{
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.topbar{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.logo{
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: var(--sombra);
+  flex-shrink: 0;
+}
+
+.topbar-text h1{
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--branco);
+  margin: 0 0 2px;
+  text-shadow: 0 2px 12px rgba(91,42,134,0.4);
+}
+
+.topbar-text p{
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+}
+
+/* =========================================================
+   STEPS NAV
+   ========================================================= */
+.steps{
+  display: flex;
+  list-style: none;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+.step-dot{
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+}
+
+.step-dot span{
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  color: var(--branco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+  transition: background 0.25s ease;
+}
+
+.step-dot.active{
+  color: var(--branco);
+}
+
+.step-dot.active span{
+  background: var(--branco);
+  color: var(--rosa);
+}
+
+/* =========================================================
+   CARD
+   ========================================================= */
+.card{
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 28px 24px;
+  overflow: hidden;
+}
+
+.screen{
+  display: none;
+  animation: fadeIn 0.35s ease;
+}
+.screen.active{ display: block; }
+
+@keyframes fadeIn{
+  from{ opacity: 0; transform: translateY(8px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+h2{
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin: 0 0 4px;
+  color: var(--roxo);
+}
+
+.hint{
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin: 0 0 20px;
+}
+
+.section-title{
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--rosa);
+  margin: 24px 0 4px;
+}
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+.field{
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label{
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  letter-spacing: 0.2px;
+}
+
+.field input,
+.field select{
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--borda);
+  background: #FBFAFD;
+  color: var(--texto);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field input:focus,
+.field select:focus{
+  border-color: var(--rosa);
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+}
+
+.field input[readonly]{
+  color: var(--texto-suave);
+  background: #F3F1F6;
+}
+
+.price-preview .price-tag{
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--roxo);
+  padding: 8px 0 0;
+}
+
+/* =========================================================
+   EXTRAS (chips)
+   ========================================================= */
+.extras-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.extra-chip{
+  border: 1.5px solid var(--borda);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #FBFAFD;
+}
+
+.chip-check{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip-check input{
+  accent-color: var(--rosa);
+  width: 16px;
+  height: 16px;
+}
+
+.chip-price{
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--borda);
+  background: var(--branco);
+}
+
+/* =========================================================
+   UPLOAD DE FOTOS
+   ========================================================= */
+.upload-box{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed var(--rosa-2);
+  border-radius: 14px;
+  padding: 18px;
+  color: var(--rosa);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  background: rgba(236, 72, 153, 0.05);
+  transition: background 0.2s ease;
+}
+.upload-box:hover{
+  background: rgba(236, 72, 153, 0.1);
+}
+.upload-icon{
+  font-size: 18px;
+  line-height: 1;
+}
+
+.fotos-preview{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.foto-thumb{
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px -6px rgba(91,42,134,0.4);
+}
+
+.foto-thumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.foto-thumb button{
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(43, 32, 51, 0.75);
+  color: var(--branco);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.foto-thumb--readonly button{ display: none; }
+
+/* =========================================================
+   RESUMO DO ORÇAMENTO (página 3)
+   ========================================================= */
+.resumo-cliente{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.resumo-cliente div{
+  background: #FBFAFD;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.resumo-cliente span{
+  display: block;
+  font-size: 11px;
+  color: var(--texto-suave);
+  margin-bottom: 2px;
+}
+
+.resumo-cliente strong{
+  font-size: 13px;
+  color: var(--texto);
+}
+
+.itens-tabela{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.item-row{
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr 0.8fr 0.8fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #FBFAFD;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.item-nome{ font-weight: 600; }
+.item-valor{ color: var(--texto-suave); text-decoration: line-through; }
+.item-final{ color: var(--roxo); font-weight: 700; text-align: right; }
+
+.item-desconto{
+  font-size: 12.5px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  width: 100%;
+}
+
+.total-box{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--roxo), var(--rosa));
+  color: var(--branco);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.total-box span{
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.total-box strong{
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+.nav-buttons{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.btn{
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:active{ transform: scale(0.97); }
+
+.btn-primary{
+  background: linear-gradient(135deg, var(--roxo), var(--rosa));
+  color: var(--branco);
+  box-shadow: 0 10px 22px -10px rgba(91,42,134,0.6);
+}
+
+.btn-ghost{
+  background: transparent;
+  color: var(--texto-suave);
+  border: 1.5px solid var(--borda);
+}
+
+.btn-send{
+  margin-left: auto;
+  background: linear-gradient(135deg, var(--rosa), var(--ciano));
+  color: var(--branco);
+  box-shadow: 0 12px 24px -10px rgba(236,72,153,0.55);
+}
+
+.footnote{
+  text-align: center;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 18px;
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+@media (max-width: 480px){
+  .extras-grid{ grid-template-columns: 1fr; }
+  .resumo-cliente{ grid-template-columns: 1fr; }
+  .item-row{
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "nome nome"
+      "valor final"
+      "desconto desconto";
+  }
+  .item-nome{ grid-area: nome; }
+  .item-valor{ grid-area: valor; }
+  .item-final{ grid-area: final; }
+  .item-desconto{ grid-area: desconto; }
+  .logo{ width: 52px; height: 52px; }
+  .topbar-text h1{ font-size: 19px; }
+}
